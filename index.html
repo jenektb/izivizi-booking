@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Онлайн-запись — izivizi</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F2F2F7;
+      --surface: #FFFFFF;
+      --label: #1C1C1E;
+      --label-secondary: #8E8E93;
+      --separator: #E5E5EA;
+      --blue: #007AFF;
+      --red: #FF3B30;
+      --surface-secondary: #F2F2F7;
+      --radius-card: 16px;
+      --radius-btn: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --surface: #1C1C1E;
+        --label: #FFFFFF;
+        --label-secondary: #8E8E93;
+        --separator: #38383A;
+        --blue: #0A84FF;
+        --red: #FF453A;
+        --surface-secondary: #2C2C2E;
+      }
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                   Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--label);
+      font-size: 16px;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Обёртка — адаптивная ── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Десктоп: две колонки */
+    @media (min-width: 900px) {
+      .page {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 32px;
+        padding: 48px 24px;
+      }
+      .sidebar {
+        width: 320px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 48px;
+      }
+      .main-content {
+        width: 100%;
+        max-width: 520px;
+      }
+    }
+
+    /* Мобильный и планшет: одна колонка */
+    @media (max-width: 899px) {
+      .sidebar {
+        width: 100%;
+        max-width: 600px;
+        padding: 24px 16px 0;
+      }
+      .main-content {
+        width: 100%;
+        max-width: 600px;
+        padding: 0 16px 48px;
+      }
+    }
+
+    /* ── Логотип ── */
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    @media (min-width: 900px) {
+      .logo { font-size: 22px; }
+    }
+
+    /* ── Карточки ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .master-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 900px) {
+      .avatar { width: 64px; height: 64px; font-size: 26px; }
+    }
+
+    .master-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--label);
+    }
+
+    @media (min-width: 900px) {
+      .master-name { font-size: 24px; }
+    }
+
+    .city {
+      font-size: 13px;
+      color: var(--label-secondary);
+      margin-top: 4px;
+    }
+
+    /* ── Заголовки секций ── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--label-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin: 20px 0 8px 4px;
+    }
+
+    /* ── Список услуг ── */
+    .services-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Планшет и десктоп — сетка услуг */
+    @media (min-width: 600px) and (max-width: 899px) {
+      .services-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+    }
+
+    .service-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s, transform 0.1s;
+      border: 2px solid transparent;
+      user-select: none;
+    }
+
+    .service-card:hover {
+      border-color: var(--blue);
+    }
+
+    .service-card:active {
+      transform: scale(0.98);
+      opacity: 0.8;
+    }
+
+    .service-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--label);
+    }
+
+    .service-meta {
+      font-size: 13px;
+      color: var(--label-secondary);
+      margin-top: 2px;
+    }
+
+    .service-arrow {
+      color: var(--label-secondary);
+      font-size: 18px;
+      margin-left: 8px;
+    }
+
+    /* ── Инпуты ── */
+    .input {
+      width: 100%;
+      padding: 14px 0;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: transparent;
+      color: var(--label);
+      font-family: inherit;
+    }
+
+    .input::placeholder { color: var(--label-secondary); }
+
+    /* ── Кнопки ── */
+    .btn-primary {
+      width: 100%;
+      height: 50px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: opacity 0.15s, transform 0.1s;
+      font-family: inherit;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.8; }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--blue);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 16px;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .back-btn:hover { opacity: 0.8; }
+
+    /* ── Разделитель ── */
+    .sep {
+      height: 0.5px;
+      background: var(--separator);
+      margin: 0 -16px;
+    }
+
+    /* ── Баннер приложения ── */
+    .app-banner {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .app-banner-icon { font-size: 32px; margin-bottom: 8px; }
+
+    .app-banner-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .app-banner-sub {
+      font-size: 13px;
+      color: var(--label-secondary);
+      margin-bottom: 14px;
+    }
+
+    .app-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--surface-secondary);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--label);
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.15s;
+      border: 1px solid var(--separator);
+    }
+
+    .app-btn:hover { opacity: 0.8; }
+
+    /* ── Powered by ── */
+    .powered {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--label-secondary);
+    }
+
+    .powered span { color: var(--blue); font-weight: 600; }
+
+    /* ── Загрузка ── */
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--label-secondary);
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--separator);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Уведомление об ошибке ── */
+    .error-banner {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 480px;
+      background: var(--red);
+      color: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      text-align: center;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ── Успех ── */
+    .success-icon { font-size: 64px; margin-bottom: 16px; }
+
+    .success-card {
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .success-card h2 { font-size: 24px; margin-bottom: 8px; }
+
+    /* ── Инфо блок ── */
+    .info-box {
+      margin-top: 20px;
+      padding: 14px;
+      background: var(--surface-secondary);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--label-secondary);
+    }
+
+    /* ── Десктоп сайдбар ── */
+    @media (min-width: 900px) {
+      .sidebar .logo { font-size: 24px; margin-bottom: 24px; }
+      .sidebar .app-banner { margin-top: 0; }
+      .sidebar .powered { margin-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <!-- Сайдбар (только десктоп — слева) -->
+  <aside class="sidebar">
+    <span class="logo">izivizi</span>
+    <div id="sidebar-master"></div>
+
+    <!-- Баннер приложения в сайдбаре на десктопе -->
+    <div class="app-banner" id="app-banner-sidebar" style="display:none">
+      <div class="app-banner-icon">📱</div>
+      <div class="app-banner-title">Получай напоминания</div>
+      <div class="app-banner-sub">Скачай приложение и подключи Telegram-бота</div>
+      <div class="app-buttons">
+        <a href="https://apps.apple.com/app/izivizi" class="app-btn">🍎 App Store</a>
+        <a href="https://play.google.com/store/apps/details?id=com.izivizi.izivizi" class="app-btn">🤖 Google Play</a>
+      </div>
+    </div>
+    <div class="powered" id="powered-sidebar" style="display:none">
+      Онлайн-запись через <span>izivizi</span>
+    </div>
+  </aside>
+
+  <!-- Основной контент -->
+  <main class="main-content">
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Загрузка...</p>
+    </div>
+    <div id="app" style="display:none"></div>
+  </main>
+</div>
+
+<div class="error-banner" id="error-banner">
+  <span id="error-text"></span>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://dlufhzokuodzuapfbphl.supabase.co';
+  const ANON_KEY = 'sb_publishable_OzpvYadGNQ74ndMlPAQktA_IoikdvC6';
+
+  // Читаем slug из URL: /index.html?slug=abc или /?slug=abc
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('slug') || window.location.pathname.split('/').filter(Boolean).pop();
+
+  const isDesktop = () => window.innerWidth >= 900;
+
+  async function init() {
+    if (!slug) {
+      showLoadingError('Мастер не найден. Проверьте ссылку.');
+      return;
+    }
+
+    try {
+      // Загружаем мастера
+      const masterRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/users?booking_slug=eq.${slug}&select=id,name,city&limit=1`,
+        { headers: { 'apikey': ANON_KEY, 'Accept': 'application/json' } }
+      );
+      const masters = await masterRes.json();
+      const master = masters?.[0];
+
+      if (!master) {
+        showLoadingError('Мастер не найден. Проверьте ссылку.');
+        return;
+      }
+
+      // Загружаем услуги
+      const servicesRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/services?master_id=eq.${master.id}&select=id,name,price,duration&order=name`,
+        { headers: { 'apikey': ANON_KEY, 'Accept': 'application/json' } }
+      );
+      const services = await servicesRes.json() ?? [];
+
+      document.title = `${master.name ?? 'Мастер'} — онлайн-запись`;
+      renderMasterSidebar(master);
+      renderApp(master, services);
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+    } catch (e) {
+      showLoadingError('Ошибка загрузки. Попробуйте обновить страницу.');
+    }
+  }
+
+  function renderMasterSidebar(master) {
+    const initial = master.name?.[0]?.toUpperCase() ?? '✂';
+    document.getElementById('sidebar-master').innerHTML = `
+      <div class="card master-card" style="margin-bottom:0">
+        <div class="avatar">${initial}</div>
+        <div>
+          <div class="master-name">${master.name ?? 'Мастер'}</div>
+          ${master.city ? `<div class="city">📍 ${master.city}</div>` : ''}
+        </div>
+      </div>
+    `;
+
+    // На десктопе баннер в сайдбаре
+    if (isDesktop()) {
+      document.getElementById('app-banner-sidebar').style.display = 'block';
+      document.getElementById('powered-sidebar').style.display = 'block';
+    }
+  }
+
+  function appBannerHtml() {
+    // На мобильном показываем баннер внутри контента
+    if (isDesktop()) return '';
+    return `
+      <div class="app-banner">
+        <div class="app-banner-icon">📱</div>
+        <div class="app-banner-title">Получай напоминания о записях</div>
+        <div class="app-banner-sub">Скачай приложение и подключи Telegram-бота</div>
+        <div class="app-buttons">
+          <a href="https://apps.apple.com/app/izivizi" class="app-btn">🍎 App Store</a>
+          <a href="https://play.google.com/store/apps/details?id=com.izivizi.izivizi" class="app-btn">🤖 Google Play</a>
+        </div>
+      </div>
+      <div class="powered">Онлайн-запись через <span>izivizi</span></div>
+    `;
+  }
+
+  function renderApp(master, services) {
+    const today = new Date().toISOString().split('T')[0];
+
+    const servicesHtml = services.length > 0
+      ? services.map(s => `
+          <div class="service-card" onclick="selectService('${s.id}','${escHtml(s.name)}',${s.price},${s.duration})">
+            <div>
+              <div class="service-name">${escHtml(s.name)}</div>
+              <div class="service-meta">${s.duration} мин · ${s.price} ₽</div>
+            </div>
+            <span class="service-arrow">›</span>
+          </div>`).join('')
+      : `<div class="service-card" onclick="selectService('none','Запись',0,60)">
+           <div>
+             <div class="service-name">Запись к мастеру</div>
+             <div class="service-meta">Уточните детали у мастера</div>
+           </div>
+           <span class="service-arrow">›</span>
+         </div>`;
+
+    document.getElementById('app').innerHTML = `
+      <!-- Шаг 1 -->
+      <div id="step1">
+        <!-- На мобильном — карточка мастера здесь -->
+        <div id="mobile-master" class="card master-card" style="display:none">
+          <div class="avatar">${master.name?.[0]?.toUpperCase() ?? '✂'}</div>
+          <div>
+            <div class="master-name">${escHtml(master.name ?? 'Мастер')}</div>
+            ${master.city ? `<div class="city">📍 ${escHtml(master.city)}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="section-title">Выберите услугу</div>
+        <div class="services-list">${servicesHtml}</div>
+        ${appBannerHtml()}
+      </div>
+
+      <!-- Шаг 2 -->
+      <div id="step2" style="display:none">
+        <button class="back-btn" onclick="goBack()">← Назад</button>
+
+        <div class="card" style="margin-bottom:12px">
+          <div id="selected-service-label" style="font-weight:600;font-size:16px"></div>
+        </div>
+
+        <div class="section-title">Дата и время</div>
+        <div class="card">
+          <input type="date" id="date-input" class="input" min="${today}" value="${today}">
+          <div class="sep"></div>
+          <input type="time" id="time-input" class="input" value="10:00">
+        </div>
+
+        <div class="section-title">Ваши данные</div>
+        <div class="card">
+          <input type="text" id="client-name" class="input" placeholder="Ваше имя" autocomplete="name">
+          <div class="sep"></div>
+          <input type="tel" id="client-phone" class="input" placeholder="Телефон (необязательно)" autocomplete="tel">
+        </div>
+
+        <button class="btn-primary" onclick="submitBooking('${master.id}')">
+          Записаться
+        </button>
+      </div>
+
+      <!-- Шаг 3: Успех -->
+      <div id="step3" style="display:none">
+        <div class="card success-card">
+          <div class="success-icon">✅</div>
+          <h2>Вы записаны!</h2>
+          <p id="success-text" style="color:var(--label-secondary);margin-top:8px;font-size:15px"></p>
+          <div class="info-box">
+            Напоминание придёт в Telegram если вы его подключили к izivizi
+          </div>
+        </div>
+        ${appBannerHtml()}
+      </div>
+    `;
+
+    // На мобильном показываем карточку мастера
+    if (!isDesktop()) {
+      document.getElementById('mobile-master').style.display = 'flex';
+    }
+  }
+
+  // Состояние выбранной услуги
+  let selId = null, selName = '', selPrice = 0, selDur = 60;
+
+  function selectService(id, name, price, dur) {
+    selId = id === 'none' ? null : id;
+    selName = name; selPrice = price; selDur = dur;
+    document.getElementById('selected-service-label').textContent =
+      price > 0 ? `${name} · ${price} ₽` : name;
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function submitBooking(masterId) {
+    const clientName = document.getElementById('client-name').value.trim();
+    const clientPhone = document.getElementById('client-phone').value.trim();
+    const dateVal = document.getElementById('date-input').value;
+    const timeVal = document.getElementById('time-input').value;
+
+    if (!clientName) { showError('Введите ваше имя'); return; }
+    if (!dateVal || !timeVal) { showError('Выберите дату и время'); return; }
+
+    const startTime = new Date(`${dateVal}T${timeVal}:00`);
+    const endTime = new Date(startTime.getTime() + selDur * 60000);
+
+    const btn = document.querySelector('.btn-primary');
+    btn.textContent = 'Отправляем...';
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/create-booking`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          master_id: masterId,
+          client_name: clientName,
+          client_phone: clientPhone || null,
+          service_id: selId,
+          service_name: selName,
+          service_price: selPrice || null,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          source: 'booking_link',
+        }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error ?? 'Ошибка сервера');
+
+      const fmt = startTime.toLocaleString('ru-RU', {
+        day: 'numeric', month: 'long',
+        hour: '2-digit', minute: '2-digit'
+      });
+      document.getElementById('success-text').textContent = `${selName} · ${fmt}`;
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (e) {
+      showError(e.message);
+      btn.textContent = 'Записаться';
+      btn.disabled = false;
+    }
+  }
+
+  function showError(msg) {
+    const b = document.getElementById('error-banner');
+    document.getElementById('error-text').textContent = msg;
+    b.style.display = 'block';
+    setTimeout(() => b.style.display = 'none', 3000);
+  }
+
+  function showLoadingError(msg) {
+    document.getElementById('loading').innerHTML = `
+      <div style="font-size:48px;margin-bottom:16px">🔍</div>
+      <p style="font-size:16px;color:var(--label)">${msg}</p>
+    `;
+  }
+
+  function escHtml(str) {
+    return (str ?? '').replace(/[&<>"']/g, c =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  init();
+</script>
+</body>
+</html>
